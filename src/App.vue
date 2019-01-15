@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div clas="settings">
-      <CountryPicker v-on:selected="onCountryChange($event)"/>
+      <CountryPicker v-on:selected="onCountryChange($event)" v-bind:default-value="country"/>
       <label for="count">
         City count
       </label>
@@ -32,7 +32,7 @@ export default {
   data() {
     return {
       country: "Q183",
-      cityCount: 50,
+      cityCount: 200,
     };
   },
   methods: {

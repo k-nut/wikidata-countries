@@ -28,6 +28,7 @@ const extractValues = (entry) => {
 
 export default {
   name: "CountryPicker",
+  props: ['defaultValue'],
   data() {
     return {
       countries: [],
@@ -37,7 +38,7 @@ export default {
   mounted() {
     getCountries().then(response => {
       this.countries = response.results.bindings.map(extractValues);
-      this.selected = this.countries[0].value;
+      this.selected = this.defaultValue || this.countries[0].value;
     });
   },
   methods: {
