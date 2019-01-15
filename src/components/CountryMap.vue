@@ -1,0 +1,62 @@
+<template>
+    <svg v-bind:viewBox="viewBox" xmlns="http://www.w3.org/2000/svg">
+        <circle v-for="point in xypoints" v-bind:cx="point.x" v-bind:cy="point.y" r="0.0001"/>
+    </svg>
+</template>
+
+<script>
+  import mercator from "projections/mercator";
+  import {getCities} from "../api";
+
+  const getCoordinates = (pointString) => {
+    const [fullMatch, lon, lat] = /Point\((.*) (.*)\)/.exec(pointString);
+    return {lat, lon}
+  };
+
+  const getDimensions = (points) => {
+    const xValues = points.map(p => p.x);
+    const yValues = points.map(p => p.y)
+    const minX = Math.min(...xValues);
+    const maxX = Math.max(...xValues);
+    const minY = Math.min(...yValues);
+    const maxY = Math.max(...yValues);
+    return `${minX * 0.998} ${minY * 0.998} ${maxX-minX} ${maxY-minY}`
+  };
+
+
+  export default {
+    name: "CountryMap",
+    props: ['country', 'count'],
+    data() {
+      return {
+        xypoints: [],
+        viewBox: '0 0 100 100'
+      };
+    },
+    methods: {
+      updateData: function (){
+        getCities(this.country, this.count).then(response => {
+          const points = response.results.bindings.map(entry => getCoordinates(entry.coordinates.value));
+          this.xypoints = points.map(point => mercator(point));
+          this.viewBox = getDimensions(this.xypoints);
+        });
+      }
+    },
+    watch: {
+      country: function () { this.updateData() },
+      count: function() { this.updateData() },
+    },
+    mounted() {
+      this.updateData()
+    }
+  };
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+    svg {
+        margin-top: 30px;
+        border: 1px solid lightgray;
+        max-height: 80vh;
+    }
+</style>
