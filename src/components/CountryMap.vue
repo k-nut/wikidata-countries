@@ -3,7 +3,7 @@
         <p> Displaying {{ xypoints.length }} cities</p>
         <Loader class="loader" v-bind:class="{visible: loading}" />
         <svg v-bind:viewBox="viewBox" xmlns="http://www.w3.org/2000/svg">
-            <circle v-for="point in xypoints" v-bind:cx="point.x" v-bind:cy="point.y" r="0.01" />
+            <circle v-for="point in xypoints" v-bind:cx="point.x" v-bind:cy="point.y" v-bind:r="radius" />
         </svg>
     </div>
 </template>
@@ -33,6 +33,11 @@
     return `${minX * 0.998} ${minY * 0.998} ${maxX-minX} ${maxY-minY}`
   };
 
+  const getRadius = (points) => {
+    const {minX, maxX, minY, maxY} = getExtremes(points);
+    return Math.min((maxX-minX), (maxY-minY)) / 100 / 2;
+  };
+
   export default {
     name: "CountryMap",
     props: ['country', 'count'],
@@ -44,6 +49,7 @@
         xypoints: [],
         viewBox: '0 0 100 100',
         loading: true,
+        radius: 0.01,
       };
     },
     methods: {
@@ -53,6 +59,7 @@
           const points = response.results.bindings.map(entry => getCoordinates(entry.coordinates.value));
           this.xypoints = points.map(point => mercator(point)).map(p => ({x: p.x*100, y:p.y*100}));
           this.viewBox = getDimensions(this.xypoints);
+          this.radius = getRadius(this.xypoints);
           this.loading = false;
         });
       }
