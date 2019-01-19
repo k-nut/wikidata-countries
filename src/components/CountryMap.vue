@@ -1,12 +1,16 @@
 <template>
-    <svg v-bind:viewBox="viewBox" xmlns="http://www.w3.org/2000/svg">
-        <circle v-for="point in xypoints" v-bind:cx="point.x" v-bind:cy="point.y" r="0.0001"/>
-    </svg>
+    <div>
+        <Loader class="loader" v-bind:class="{visible: loading}" />
+        <svg v-bind:viewBox="viewBox" xmlns="http://www.w3.org/2000/svg">
+            <circle v-for="point in xypoints" v-bind:cx="point.x" v-bind:cy="point.y" r="0.0001"/>
+        </svg>
+    </div>
 </template>
 
 <script>
   import mercator from "projections/mercator";
   import {getCities} from "../api";
+  import Loader from "./Loader";
 
   const getCoordinates = (pointString) => {
     const [fullMatch, lon, lat] = /Point\((.*) (.*)\)/.exec(pointString);
@@ -27,18 +31,24 @@
   export default {
     name: "CountryMap",
     props: ['country', 'count'],
+    components: {
+      Loader,
+    },
     data() {
       return {
         xypoints: [],
-        viewBox: '0 0 100 100'
+        viewBox: '0 0 100 100',
+        loading: true,
       };
     },
     methods: {
       updateData: function (){
+        this.loading = true;
         getCities(this.country, this.count).then(response => {
           const points = response.results.bindings.map(entry => getCoordinates(entry.coordinates.value));
           this.xypoints = points.map(point => mercator(point));
           this.viewBox = getDimensions(this.xypoints);
+          this.loading = false;
         });
       }
     },
@@ -59,4 +69,12 @@
         border: 1px solid lightgray;
         max-height: 80vh;
     }
+
+    .loader {
+        visibility: hidden;
+    }
+    .loader.visible {
+        visibility: visible;
+    }
+
 </style>
