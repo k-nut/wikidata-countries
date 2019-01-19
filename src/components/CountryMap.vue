@@ -19,7 +19,7 @@
   import Loader from "./Loader";
 
   const getCoordinates = (pointString) => {
-    const [fullMatch, lon, lat] = /Point\((.*) (.*)\)/.exec(pointString);
+    const [, lon, lat] = /Point\((.*) (.*)\)/.exec(pointString);
     return {lat, lon}
   };
 
