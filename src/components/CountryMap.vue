@@ -2,8 +2,13 @@
     <div>
         <p> Displaying {{ xypoints.length }} cities</p>
         <Loader class="loader" v-bind:class="{visible: loading}" />
-        <svg v-bind:viewBox="viewBox" xmlns="http://www.w3.org/2000/svg">
-            <circle v-for="point in xypoints" v-bind:cx="point.x" v-bind:cy="point.y" r="0.0001"/>
+        <svg v-bind:viewBox="viewBox"
+             xmlns="http://www.w3.org/2000/svg"
+             width="600px"
+             v-bind:height="height"
+             preserveAspectRatio="xMidYMid meet"
+        >
+            <circle v-for="point in xypoints" v-bind:cx="point.x" v-bind:cy="point.y" r="0.0001" />
         </svg>
     </div>
 </template>
@@ -18,16 +23,25 @@
     return {lat, lon}
   };
 
-  const getDimensions = (points) => {
+  const getExtremes = points => {
     const xValues = points.map(p => p.x);
-    const yValues = points.map(p => p.y)
+    const yValues = points.map(p => p.y);
     const minX = Math.min(...xValues);
     const maxX = Math.max(...xValues);
     const minY = Math.min(...yValues);
     const maxY = Math.max(...yValues);
+    return {minX, maxX, minY, maxY}
+  };
+
+  const getDimensions = (points) => {
+    const {minX, maxX, minY, maxY} = getExtremes(points);
     return `${minX * 0.998} ${minY * 0.998} ${maxX-minX} ${maxY-minY}`
   };
 
+  const getRatio = points => {
+    const {minX, maxX, minY, maxY} = getExtremes(points);
+    return (maxY -minY)/ (maxX - minX);
+  };
 
   export default {
     name: "CountryMap",
@@ -40,6 +54,8 @@
         xypoints: [],
         viewBox: '0 0 100 100',
         loading: true,
+        ratio: 1,
+        height: '100px',
       };
     },
     methods: {
@@ -50,6 +66,8 @@
           this.xypoints = points.map(point => mercator(point));
           this.viewBox = getDimensions(this.xypoints);
           this.loading = false;
+          this.ratio = getRatio(this.xypoints);
+          this.height = `${400 * this.ratio}px`;
         });
       }
     },
@@ -66,9 +84,7 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
     svg {
-        margin-top: 30px;
         border: 1px solid lightgray;
-        max-height: 80vh;
     }
 
     .loader {
