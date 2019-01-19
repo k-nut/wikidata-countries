@@ -2,12 +2,7 @@
     <div>
         <p> Displaying {{ xypoints.length }} cities</p>
         <Loader class="loader" v-bind:class="{visible: loading}" />
-        <svg v-bind:viewBox="viewBox"
-             xmlns="http://www.w3.org/2000/svg"
-             width="600px"
-             v-bind:height="height"
-             preserveAspectRatio="xMidYMid meet"
-        >
+        <svg v-bind:viewBox="viewBox" xmlns="http://www.w3.org/2000/svg">
             <circle v-for="point in xypoints" v-bind:cx="point.x" v-bind:cy="point.y" r="0.01" />
         </svg>
     </div>
@@ -38,11 +33,6 @@
     return `${minX * 0.998} ${minY * 0.998} ${maxX-minX} ${maxY-minY}`
   };
 
-  const getRatio = points => {
-    const {minX, maxX, minY, maxY} = getExtremes(points);
-    return (maxY -minY)/ (maxX - minX);
-  };
-
   export default {
     name: "CountryMap",
     props: ['country', 'count'],
@@ -54,8 +44,6 @@
         xypoints: [],
         viewBox: '0 0 100 100',
         loading: true,
-        ratio: 1,
-        height: '100px',
       };
     },
     methods: {
@@ -66,8 +54,6 @@
           this.xypoints = points.map(point => mercator(point)).map(p => ({x: p.x*100, y:p.y*100}));
           this.viewBox = getDimensions(this.xypoints);
           this.loading = false;
-          this.ratio = getRatio(this.xypoints);
-          this.height = `${400 * this.ratio}px`;
         });
       }
     },
@@ -85,6 +71,7 @@
 <style scoped>
     svg {
         border: 1px solid lightgray;
+        width: 100%;
     }
 
     .loader {

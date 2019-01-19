@@ -58,9 +58,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
   margin-top: 60px;
-}
-.intro {
-  max-width: 80ch;
+    max-width: 80ch;
 }
 .disclaimer {
   font-size: .8rem;
