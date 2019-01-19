@@ -1,5 +1,6 @@
 <template>
     <div>
+        <p> Displaying {{ xypoints.length }} cities</p>
         <Loader class="loader" v-bind:class="{visible: loading}" />
         <svg v-bind:viewBox="viewBox" xmlns="http://www.w3.org/2000/svg">
             <circle v-for="point in xypoints" v-bind:cx="point.x" v-bind:cy="point.y" r="0.0001"/>
