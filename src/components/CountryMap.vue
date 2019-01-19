@@ -8,7 +8,7 @@
              v-bind:height="height"
              preserveAspectRatio="xMidYMid meet"
         >
-            <circle v-for="point in xypoints" v-bind:cx="point.x" v-bind:cy="point.y" r="0.0001" />
+            <circle v-for="point in xypoints" v-bind:cx="point.x" v-bind:cy="point.y" r="0.01" />
         </svg>
     </div>
 </template>
@@ -63,7 +63,7 @@
         this.loading = true;
         getCities(this.country, this.count).then(response => {
           const points = response.results.bindings.map(entry => getCoordinates(entry.coordinates.value));
-          this.xypoints = points.map(point => mercator(point));
+          this.xypoints = points.map(point => mercator(point)).map(p => ({x: p.x*100, y:p.y*100}));
           this.viewBox = getDimensions(this.xypoints);
           this.loading = false;
           this.ratio = getRatio(this.xypoints);
