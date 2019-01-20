@@ -37,7 +37,9 @@ WHERE
 {
     BIND(wd:${country} AS ?country)
 
-	?city wdt:P31/wdt:P279* wd:Q515 .
+    {?city wdt:P31/wdt:P279* wd:Q515 }
+    UNION 
+    {?city wdt:P31/wdt:P279* wd:Q7930989 } .
 	?city wdt:P1082 ?population .          
 	?city wdt:P17 ?country .          
     ?city wdt:P625 ?coordinates .
