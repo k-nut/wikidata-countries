@@ -30,7 +30,12 @@
 
   const getDimensions = (points) => {
     const {minX, maxX, minY, maxY} = getExtremes(points);
-    return `${minX * 0.998} ${minY * 0.998} ${maxX-minX} ${maxY-minY}`
+    const PADDING = 0.02;
+    const xRange = maxX - minX;
+    const yRange = maxY - minY;
+    const xStart = minX - PADDING * xRange;
+    const yStart = minY - PADDING * yRange;
+    return `${xStart} ${yStart} ${xRange * 1.04} ${yRange * 1.04}`
   };
 
   const getRadius = (points) => {
