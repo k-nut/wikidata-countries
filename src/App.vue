@@ -1,66 +1,86 @@
 <template>
-  <div id="app">
-      <h1> City-Country-Shapes</h1>
-      <p class="intro"> How many of a country's biggest cities does it take for you to recognize the country by the shape
-      of its cities? You can try around here. Just pick a country and a number of cities to display.</p>
-      <p class="intro disclaimer">This project is based on data from <a href="https://wikidata.org">Wikidata</a>.
-      At times the data might not be complete and you might not get as many cities as you asked for. The great thing
-      about Wikidata is that - just like Wikipedia - it is open for everyone to improve it.
-         You can <a href="https://www.wikidata.org/wiki/Wikidata:Introduction">start here</a> to learn more about the project or
-      get in touch with me on <a href="https://twitter.com/notknut">twitter</a>.</p>
-    <div clas="settings">
-      <CountryPicker v-on:selected="onCountryChange($event)" v-bind:default-value="country"/>
-      <label for="count">
-        City count
-      </label>
-      <select v-model="cityCount" id="count">
-        <option value="10">10</option>
-        <option value="20">20</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="200">200</option>
-        <option value="500">500</option>
-        <option value="1000">1000</option>
-      </select>
+    <div id="app">
+        <CountryMap v-bind:country="country" v-bind:count="cityCount"/>
+        <ul class="options">
+            <li v-for="choice in choices" :key="choice.value">
+                <button>{{ choice.name }}</button>
+            </li>
+        </ul>
     </div>
-    <CountryMap v-bind:country="country" v-bind:count="cityCount" />
-  </div>
+
 </template>
 
 <script>
-import CountryPicker from './components/CountryPicker'
-import CountryMap from './components/CountryMap'
+  import CountryPicker from "./components/CountryPicker";
+  import CountryMap from "./components/CountryMap";
+  import {getCountries} from "./api";
+  import {extractValues} from "./components/utils";
 
-export default {
-  name: 'app',
-  components: {
-    CountryPicker,
-    CountryMap,
-  },
-  data() {
-    return {
-      country: "Q183",
-      cityCount: 200,
-    };
-  },
-  methods: {
-    onCountryChange (country) {
-      this.country = country;
+  const popRandom = array => {
+    return array.splice(Math.floor(Math.random() * array.length), 1)[0];
+  };
+
+  export default {
+    name: "app",
+    components: {
+      CountryMap
+    },
+    data() {
+      return {
+        country: null,
+        cityCount: 500,
+        choices: []
+      };
+    },
+    methods: {
+      onCountryChange(country) {
+        this.country = country;
+      }
+    },
+    mounted() {
+      getCountries().then(response => {
+        const condensed = response.results.bindings.map(extractValues);
+        const displayCountry =  popRandom(condensed);
+        const alternatives = Array.from({length: 3}).map(() => popRandom(condensed));
+        this.country = displayCountry.value;
+        this.choices = [...alternatives, displayCountry];
+      });
     }
-  }
-}
+  };
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  margin-top: 60px;
-    max-width: 80ch;
-}
-.disclaimer {
-  font-size: .8rem;
-}
+    html {
+        box-sizing: border-box;
+    }
+
+    *,
+    *:before,
+    *:after {
+        box-sizing: inherit;
+    }
+
+    #app {
+        font-family: "Avenir", Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        color: #2c3e50;
+        height: 100vh;
+    }
+
+    .options {
+        display: flex;
+        list-style-type: none;
+        flex-wrap: wrap;
+    }
+
+    .options li {
+        width: 50%;
+        padding: 10px;
+    }
+
+    .options button {
+        width: 100%;
+        height: 3em;
+    }
 </style>

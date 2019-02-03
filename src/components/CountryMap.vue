@@ -1,9 +1,15 @@
 <template>
     <div>
-        <p> Displaying {{ xypoints.length }} cities</p>
+        <p> Displaying {{ visibleCount }} cities</p>
         <Loader class="loader" v-bind:class="{visible: loading}" />
         <svg v-bind:viewBox="viewBox" xmlns="http://www.w3.org/2000/svg">
-            <circle v-for="point in xypoints" v-bind:cx="point.x" v-bind:cy="point.y" v-bind:r="radius" />
+            <circle v-for="point in xypoints"
+                    v-bind:key="point.city"
+                    v-bind:cx="point.x"
+                    v-bind:cy="point.y"
+                    v-bind:r="radius"
+                    v-bind:visibility="point.visible ? 'visible': 'hidden'"
+            />
         </svg>
     </div>
 </template>
@@ -38,6 +44,13 @@
     return Math.min((maxX-minX), (maxY-minY)) / 100 / 2;
   };
 
+  // https://ilikekillnerds.com/2016/05/removing-duplicate-objects-array-property-name-javascript/
+  function removeDuplicates(myArr, prop) {
+    return myArr.filter((obj, pos, arr) => {
+      return arr.map(mapObj => mapObj[prop]).indexOf(obj[prop]) === pos;
+    });
+  }
+
   export default {
     name: "CountryMap",
     props: ['country', 'count'],
@@ -50,18 +63,40 @@
         viewBox: '0 0 100 100',
         loading: true,
         radius: 0.01,
+        visibleCount: 1,
       };
     },
     methods: {
       updateData: function (){
         this.loading = true;
         getCities(this.country, this.count).then(response => {
-          const points = response.results.bindings.map(entry => getCoordinates(entry.coordinates.value));
-          this.xypoints = points.map(point => mercator(point)).map(p => ({x: p.x*100, y:p.y*100}));
+          const points = response.results.bindings.map(entry => {
+            return {
+              city: entry.city.value,
+              ...getCoordinates(entry.coordinates.value)
+            }
+          });
+          this.xypoints = removeDuplicates(points, 'city').map(point => {
+            const projected = mercator(point);
+            return {
+              ...point,
+              visible: false,
+              x: projected.x * 100,
+              y: projected.y * 100,
+            };
+          });
+          this.updateVisibility();
           this.viewBox = getDimensions(this.xypoints);
           this.radius = getRadius(this.xypoints);
           this.loading = false;
         });
+      },
+      updateVisibility(){
+        if (this.visibleCount < this.xypoints.length){
+          this.xypoints[this.visibleCount].visible = true;
+          this.visibleCount += 1;
+          setTimeout(this.updateVisibility, 100);
+        }
       }
     },
     watch: {
@@ -78,7 +113,8 @@
 <style scoped>
     svg {
         border: 1px solid lightgray;
-        width: 100%;
+        max-width: 100%;
+        max-height: 80vh;
     }
 
     .loader {
