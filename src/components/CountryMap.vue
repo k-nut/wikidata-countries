@@ -1,7 +1,11 @@
 <template>
     <div>
-        <p> Displaying {{ xypoints.length }} cities</p>
+        <div class="stats">
+        <p> Displaying {{ xypoints.length }} cities. <br />
+            Biggest: {{ stats.biggest }} inhabitants<br/>
+            Smallest: {{ stats.smallest }} inhabitants</p>
         <Loader class="loader" v-bind:class="{visible: loading}" />
+        </div>
         <svg v-bind:viewBox="viewBox" xmlns="http://www.w3.org/2000/svg">
             <circle v-for="point in xypoints" v-bind:cx="point.x" v-bind:cy="point.y" v-bind:r="radius" />
         </svg>
@@ -43,6 +47,14 @@
     return Math.min((maxX-minX), (maxY-minY)) / 100 / 2;
   };
 
+  const getPopulationStats = (data) => {
+    const population = data.map(d => d.population.value);
+    return {
+      biggest: Math.max(...population).toLocaleString(),
+      smallest: Math.min(...population).toLocaleString()
+    };
+  };
+
   export default {
     name: "CountryMap",
     props: ['country', 'count'],
@@ -55,6 +67,7 @@
         viewBox: '0 0 100 100',
         loading: true,
         radius: 0.01,
+        stats: {biggest: 0, smallest: 0},
       };
     },
     methods: {
@@ -66,6 +79,7 @@
           this.viewBox = getDimensions(this.xypoints);
           this.radius = getRadius(this.xypoints);
           this.loading = false;
+          this.stats = getPopulationStats(response.results.bindings);
         });
       }
     },
@@ -86,8 +100,14 @@
         width: 100%;
     }
 
+    .stats {
+        display: flex;
+        align-items: center;
+    }
+
     .loader {
         visibility: hidden;
+        margin-left: 20px;
     }
     .loader.visible {
         visibility: visible;

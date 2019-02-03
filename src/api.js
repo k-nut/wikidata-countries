@@ -32,7 +32,7 @@ ORDER BY DESC(?population)`;
 
 export const getCities = (country, count) => {
   const sparqlQuery = `
-SELECT distinct ?city ?coordinates
+SELECT distinct ?city ?coordinates ?population
 WHERE
 {
     BIND(wd:${country} AS ?country)
