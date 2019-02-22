@@ -15,14 +15,10 @@
 import { getCountries } from "../api";
 
 const extractValues = (entry) => {
-  const parts = entry.country.value.split("/");
-  // http://www.wikidata.org/entity/Q672
-  // gets the last identifier from a url like
-  
-  const value =  parts[parts.length - 1];
+  console.log(entry.country.value);
   return {
     name: entry.countryLabel.value,
-    value
+    value: entry.country.value,
   };
 };
 

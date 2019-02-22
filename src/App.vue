@@ -39,7 +39,7 @@ export default {
   },
   data() {
     return {
-      country: "Q183",
+      country: "http://www.wikidata.org/entity/Q183",
       cityCount: 200,
     };
   },
